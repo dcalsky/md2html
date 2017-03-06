@@ -4,8 +4,8 @@
   // todo: use array
   var mdReg = {
     heading: /^\s*(#{1,6})\s+(.*?)\n*$/,
-    strong: /\*{2}(.*?)\*{2}/,
-    emphasis: /\*{1}(.*?)\*{1}/,
+    strong: /\*{2}([^\s]*)\*{2}/,
+    emphasis: /\*{1}([^\s]+)\*{1}/,
     paragraph: '/[\S]*$/'
     // paragraph: /^\n*(.*)$/,
   }
@@ -87,7 +87,8 @@
     },
     _handleInline: function (src, reg, item) {
       return src.replace(reg, function (_, attr) {
-        return this._formatTemplate(item, attr)
+        var next = this._scanMD(attr)
+        return this._formatTemplate(item, next)
       }.bind(this))
     },
     _scanMD: function (src) {
@@ -98,12 +99,11 @@
         if (type['block'].indexOf(item) > -1) {
           reg = mdReg[item]
           var result = this._handleBlock(src, reg, item)
-          if (result) {
-            return result
-          }
+          if (result) return result
         } else {
           reg = new RegExp(mdReg[item], 'g')
-          return this._handleInline(src, reg, item)
+          var result = this._handleInline(src, reg, item)
+          if (src !== result) return result
         }
       }
       // Match unsuccessfully
@@ -111,7 +111,7 @@
     },
     parse: function (src) {
       if (!src) return ''
-      var output
+      var output = ''
       var lines = src.split(/\n/)
       lines.map(function (line) {
         this.currentLimitation = []
@@ -122,9 +122,7 @@
     init: function () {
 
     }
-
   }
-
   global.MD = MD
 
 })(window, window.jQuery, document)
