@@ -21,7 +21,7 @@
     constructor: Md2html,
     handleValue: function (e) {
       var value = this.md.val()
-      this.html.text(this.parser.parse(value))
+      this.html.val(this.parser.parse(value))
     },
     _bindElement: function () {
       var elements = this.elements
